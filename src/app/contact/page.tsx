@@ -10,9 +10,9 @@ export default function ContactPage() {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-5 pt-16 sm:px-8 md:pt-24 lg:px-14">
       <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-mute">Contact</p>
-      <h1 className="mt-4 text-[clamp(2.5rem,5.6vw,5.25rem)] font-light leading-[1.02] tracking-[-0.045em]">
-        <span className="block text-ink">Have something</span>
-        <span className="block italic text-headline-soft">
+      <h1 className="mt-4 text-[clamp(2rem,4.45vw,4.25rem)] leading-[0.96]">
+        <span className="block font-light tracking-[-0.06em] text-headline-soft">Have something</span>
+        <span className="block text-[1.18em] font-semibold italic leading-[0.96] tracking-[-0.06em] text-headline-strong">
           in mind
           <span aria-hidden className="ml-[0.04em] inline-block size-[0.13em] rounded-full bg-accent" />
         </span>

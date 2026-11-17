@@ -5,14 +5,14 @@ import { projects } from "@/lib/projects";
 export default function Home() {
   return (
     <>
-      <section className="mx-auto w-full max-w-[1440px] px-5 pt-16 sm:px-8 md:pt-24 lg:px-14 lg:pt-28">
-        {/* Line 1: ~80px at 1440px wide (capped at 84px), scaling down on phones.
-            Line 2 is 1.18× line 1. Tight line-height pulls the two lines together as in the Figma. */}
-        {/* Letter-spacing is set per line: an em value set on the h1 would be inherited as
-            fixed px and come out looser on the larger second line. */}
-        <h1 className="text-[clamp(2rem,5.6vw,5.25rem)] font-light leading-[0.98]">
-          <span className="block tracking-[-0.06em] text-ink">I Design &amp; Build</span>
-          <span className="-mt-[0.06em] block text-[1.18em] italic leading-[0.98] tracking-[-0.06em] text-headline-soft">
+      <section className="mx-auto w-full max-w-[1440px] px-5 pt-12 sm:px-8 md:pt-14 lg:px-14 lg:pt-12">
+        {/* One composition: a thin grey line over a heavier italic black line.
+            Line 1 ≈ 64px at 1440px wide (capped at 68px); line 2 is 1.18× (≈ 76px, capped at 80px).
+            Letter-spacing is set per line, because an em value on the h1 would be inherited
+            as fixed px and come out looser on the larger second line. */}
+        <h1 className="text-[clamp(2rem,4.45vw,4.25rem)] leading-[0.96]">
+          <span className="block font-light tracking-[-0.06em] text-headline-soft">I Design &amp; Build</span>
+          <span className="block text-[1.18em] font-semibold italic leading-[0.96] tracking-[-0.06em] text-headline-strong">
             Digital Products
             <span
               aria-hidden
@@ -26,7 +26,7 @@ export default function Home() {
       <section
         id="work"
         aria-labelledby="work-heading"
-        className="mx-auto mt-14 w-full max-w-[1440px] scroll-mt-8 px-5 sm:px-8 md:mt-20 lg:px-14"
+        className="mx-auto mt-10 w-full max-w-[1440px] scroll-mt-8 px-5 sm:px-8 md:mt-12 lg:px-14"
       >
         <div className="mb-2 flex items-baseline justify-between text-[12px] font-medium uppercase tracking-[0.12em] text-mute">
           <h2 id="work-heading">Selected work</h2>

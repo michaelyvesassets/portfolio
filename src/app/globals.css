@@ -13,7 +13,8 @@
   --color-paper: #ffffff;
   --color-wash: #f6f6f7;
   --color-accent: #ff0088;
-  --color-headline-soft: #b5b5b5;
+  --color-headline-soft: #afafaf;
+  --color-headline-strong: #111111;
 }
 
 :root {

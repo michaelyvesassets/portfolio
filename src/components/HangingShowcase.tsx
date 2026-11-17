@@ -23,7 +23,7 @@ import type { Project } from "@/lib/projects";
 /* ------------------------------------------------------------------ */
 
 /** Connector length per card as a fraction of card width — the staggered drop from the Figma. */
-const DROP_RATIO = [0.6, 0.26, 0.66, 0.44];
+const DROP_RATIO = [0.36, 0.14, 0.42, 0.26];
 /** Sway amplitude (deg) and period (s) per card, deliberately out of phase. */
 const SWAY = [
   { amp: 1.1, period: 6.4, delay: 0 },
@@ -34,7 +34,7 @@ const SWAY = [
 /**
  * Scroll response per card.
  * - swing: multiplier on the shared scroll-velocity swing (deg), so cards don't move in lockstep.
- * - drift: px the connector lengthens (entering) / shortens (leaving) as the section scrolls past.
+ * - drift: px the connector shortens per unit of scroll drift (cards rise toward the cable).
  */
 const SCROLL = [
   { swing: 1, drift: 16 },
@@ -64,23 +64,24 @@ type Layout = {
 function computeLayout(width: number, count: number): Layout {
   const perView = width >= 1120 ? 4 : width >= 820 ? 3 : width >= 540 ? 2 : 1.18;
   const step = width / perView;
-  const cardW = Math.round(Math.min(step * 0.84, 312));
-  const cardH = Math.round(cardW * 1.24);
+  // Capped so the whole showcase fits the first screen at 1440×900.
+  const cardW = Math.round(Math.min(step * 0.84, 256));
+  const cardH = Math.round(cardW * 1.1);
   const trackWidth = step * count;
 
   // Hanging points are evenly spaced along x…
   const xs = Array.from({ length: count }, (_, i) => step * (i + 0.5));
   // …the cable runs a little past the outer cards and sags with its length…
   const overhang = Math.min(step * 0.32, 96);
-  const sag = clamp(trackWidth * 0.028, 12, 46);
+  const sag = clamp(trackWidth * 0.022, 12, 36);
   const curve = saggingCable(xs[0] - overhang, xs[count - 1] + overhang, CABLE_TOP, sag);
   // …and each connector starts exactly on the curve: solve B_x(t) = x, then take B_y(t).
   const anchors = xs.map((x) => pointAtX(curve, x));
 
   // Shorter drops on small screens keep the section compact.
-  const dropScale = perView < 2 ? 0.55 : 1;
-  const drops = anchors.map((_, i) => Math.round(cardW * DROP_RATIO[i % DROP_RATIO.length] * dropScale) + 18);
-  const height = Math.ceil(Math.max(...anchors.map((a, i) => a.y + drops[i] + cardH)) + 56);
+  const dropScale = perView < 2 ? 0.8 : 1;
+  const drops = anchors.map((_, i) => Math.round(cardW * DROP_RATIO[i % DROP_RATIO.length] * dropScale) + 16);
+  const height = Math.ceil(Math.max(...anchors.map((a, i) => a.y + drops[i] + cardH)) + 28);
 
   return {
     width,
@@ -120,11 +121,7 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
   const x = useMotionValue(0);
 
   /* Scroll physics (all motion values: no React re-renders while scrolling). */
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollY, scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
+  const { scrollY } = useScroll();
   // Scroll speed → swing angle. Scrolling down tilts cards back, like a hanging sign
   // that lags behind the movement; the under-damped spring lets it settle with a small sway.
   const scrollVelocity = useVelocity(scrollY);
@@ -132,8 +129,10 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
     clamp: true,
   });
   const swing = useSpring(swingTarget, { stiffness: 110, damping: 9, mass: 0.9 });
-  // Section position in the viewport: -1 entering at the bottom, 0 centred, 1 leaving at the top.
-  const progress = useTransform(scrollYProgress, [0, 1], [-1, 1]);
+  // Scroll drift: 0 at the top of the page (cards hang exactly as designed on the first
+  // screen), rising to 1.2 over the first 800px, so connectors shorten as you scroll
+  // down and lengthen again on the way back up.
+  const progress = useTransform(scrollY, [0, 800], [0, 1.2], { clamp: true });
 
   // Recompute geometry whenever the available width changes.
   useEffect(() => {
@@ -201,7 +200,6 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
 
   return (
     <section
-      ref={sectionRef}
       aria-roledescription="carousel"
       aria-label="Selected work"
       className="relative"
@@ -313,7 +311,7 @@ type HangerProps = {
   reduce: boolean;
   /** Shared scroll-velocity swing in degrees. */
   swing: MotionValue<number>;
-  /** Section position in the viewport, -1 (entering) → 1 (leaving). */
+  /** Scroll drift factor: 0 at page top → 1.2 after scrolling 800px. */
   progress: MotionValue<number>;
   highlighted: boolean;
   linkRef: (el: HTMLAnchorElement | null) => void;
@@ -436,7 +434,7 @@ function Hanger({
               label="Cover image"
               sizes={`${cardW}px`}
               compact
-              className="aspect-[1.3] w-full shrink-0 rounded-[20px]"
+              className="aspect-[1.7] w-full shrink-0 rounded-[18px]"
             />
 
             <div className="mt-[7%] flex min-h-0 flex-1 flex-col">
