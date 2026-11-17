@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme {
@@ -12,7 +12,8 @@
   --color-cable: #cfcfd3;
   --color-paper: #ffffff;
   --color-wash: #f6f6f7;
-  --color-accent: #0f1fa8;
+  --color-accent: #ff0088;
+  --color-headline-soft: #b5b5b5;
 }
 
 :root {
@@ -28,12 +29,11 @@ body {
   background: #ffffff;
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv11";
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: #0f1fa8;
+  background: #ff0088;
   color: #ffffff;
 }
 

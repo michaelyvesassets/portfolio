@@ -1,7 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { animate, motion, useMotionValue, useReducedMotion, type PanInfo } from "motion/react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+  useVelocity,
+  type MotionValue,
+  type PanInfo,
+} from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ProjectMedia } from "@/components/ProjectMedia";
 import { pointAtX, saggingCable, toPathD, type CubicBezier, type Point } from "@/lib/bezier";
@@ -20,6 +31,19 @@ const SWAY = [
   { amp: 1.2, period: 5.8, delay: 0.4 },
   { amp: 0.9, period: 6.9, delay: 1.3 },
 ];
+/**
+ * Scroll response per card.
+ * - swing: multiplier on the shared scroll-velocity swing (deg), so cards don't move in lockstep.
+ * - drift: px the connector lengthens (entering) / shortens (leaving) as the section scrolls past.
+ */
+const SCROLL = [
+  { swing: 1, drift: 16 },
+  { swing: 0.8, drift: 26 },
+  { swing: 1.15, drift: 20 },
+  { swing: 0.9, drift: 30 },
+];
+/** Max swing from scrolling, in degrees — enough to feel physical, never wild. */
+const MAX_SCROLL_SWING = 3.5;
 const CABLE_TOP = 22;
 const FALLBACK_WIDTH = 1280;
 
@@ -95,6 +119,22 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
   const layout = useMemo(() => computeLayout(measured ?? FALLBACK_WIDTH, count), [measured, count]);
   const x = useMotionValue(0);
 
+  /* Scroll physics (all motion values: no React re-renders while scrolling). */
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollY, scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  // Scroll speed → swing angle. Scrolling down tilts cards back, like a hanging sign
+  // that lags behind the movement; the under-damped spring lets it settle with a small sway.
+  const scrollVelocity = useVelocity(scrollY);
+  const swingTarget = useTransform(scrollVelocity, [-2600, 0, 2600], [MAX_SCROLL_SWING, 0, -MAX_SCROLL_SWING], {
+    clamp: true,
+  });
+  const swing = useSpring(swingTarget, { stiffness: 110, damping: 9, mass: 0.9 });
+  // Section position in the viewport: -1 entering at the bottom, 0 centred, 1 leaving at the top.
+  const progress = useTransform(scrollYProgress, [0, 1], [-1, 1]);
+
   // Recompute geometry whenever the available width changes.
   useEffect(() => {
     const el = viewportRef.current;
@@ -161,6 +201,7 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
 
   return (
     <section
+      ref={sectionRef}
       aria-roledescription="carousel"
       aria-label="Selected work"
       className="relative"
@@ -168,8 +209,10 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
       <div
         ref={viewportRef}
         onKeyDown={onKeyDown}
-        className="relative transition-opacity duration-500"
-        style={{ height: layout.height, overflowX: "clip", opacity: measured ? 1 : 0 }}
+        // Always visible: the server-rendered fallback layout shows the cards even
+        // if JavaScript never runs; measurement only refines the geometry.
+        className="relative"
+        style={{ height: layout.height, overflowX: "clip" }}
       >
         <motion.div
           className={`absolute left-0 top-0 h-full ${canDrag ? "cursor-grab active:cursor-grabbing" : ""}`}
@@ -194,6 +237,8 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
               cardW={layout.cardW}
               cardH={layout.cardH}
               reduce={reduce}
+              swing={swing}
+              progress={progress}
               highlighted={interacted && i === active}
               linkRef={(el) => {
                 linkRefs.current[i] = el;
@@ -266,6 +311,10 @@ type HangerProps = {
   cardW: number;
   cardH: number;
   reduce: boolean;
+  /** Shared scroll-velocity swing in degrees. */
+  swing: MotionValue<number>;
+  /** Section position in the viewport, -1 (entering) → 1 (leaving). */
+  progress: MotionValue<number>;
   highlighted: boolean;
   linkRef: (el: HTMLAnchorElement | null) => void;
   onFocus: () => void;
@@ -273,6 +322,7 @@ type HangerProps = {
 };
 
 const LIFT = 12;
+const MIN_CONNECTOR = 10;
 
 function Hanger({
   project,
@@ -283,6 +333,8 @@ function Hanger({
   cardW,
   cardH,
   reduce,
+  swing,
+  progress,
   highlighted,
   linkRef,
   onFocus,
@@ -290,11 +342,32 @@ function Hanger({
 }: HangerProps) {
   const [hot, setHot] = useState(false);
   const sway = SWAY[index % SWAY.length];
+  const scroll = SCROLL[index % SCROLL.length];
   const raised = hot || highlighted;
   const isConcept = project.status === "concept";
 
   const titleSize = clamp(cardW * 0.068, 15, 21);
   const metaSize = clamp(cardW * 0.046, 12, 14);
+
+  // Connector length = designed drop − scroll drift − hover lift. Every input is a
+  // motion value, so scrolling and hovering compose without re-rendering React.
+  const dropMV = useMotionValue(drop);
+  // Start from the same value as the server render (which can't know the user's
+  // motion preference); the effect below zeroes it for reduced motion after hydration.
+  const driftAmp = useMotionValue(scroll.drift);
+  const lift = useSpring(0, { stiffness: 320, damping: 22 });
+  useEffect(() => {
+    dropMV.set(drop);
+    driftAmp.set(reduce ? 0 : scroll.drift);
+    const target = raised ? LIFT : 0;
+    if (reduce) lift.jump(target);
+    else lift.set(target);
+  }, [drop, reduce, raised, scroll.drift, dropMV, driftAmp, lift]);
+
+  const connector = useTransform([dropMV, progress, driftAmp, lift], ([d, p, a, l]: number[]) =>
+    Math.max(MIN_CONNECTOR, d - p * a - l),
+  );
+  const scrollSwing = useTransform(swing, (deg) => (reduce ? 0 : deg * scroll.swing));
 
   return (
     <motion.div
@@ -302,105 +375,110 @@ function Hanger({
       aria-roledescription="slide"
       aria-label={`${index + 1} of ${count}`}
       className="absolute"
-      // The pivot is the exact point where the connector meets the cable.
-      style={{ left: anchor.x - cardW / 2, top: anchor.y, width: cardW, transformOrigin: "50% 0%" }}
-      animate={reduce ? { rotate: 0 } : { rotate: [0, sway.amp, 0, -sway.amp, 0] }}
-      transition={
-        reduce
-          ? { duration: 0 }
-          : { duration: sway.period, delay: sway.delay, repeat: Infinity, ease: "easeInOut" }
-      }
+      // Both rotations pivot on the exact point where the connector meets the cable,
+      // so the card can swing freely without ever detaching from it.
+      style={{
+        left: anchor.x - cardW / 2,
+        top: anchor.y,
+        width: cardW,
+        transformOrigin: "50% 0%",
+        rotate: scrollSwing,
+      }}
     >
-      {/* Connector: shortening it lifts the card while staying attached. */}
       <motion.div
-        aria-hidden
-        className="mx-auto w-[1.5px] bg-cable"
-        initial={false}
-        animate={{ height: drop - (raised ? LIFT : 0) }}
-        transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 22 }}
-      />
-
-      <motion.div
-        initial={false}
-        animate={{ rotate: hot && !reduce ? (index % 2 ? 0.9 : -0.9) : 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 18 }}
         style={{ transformOrigin: "50% 0%" }}
+        animate={reduce ? { rotate: 0 } : { rotate: [0, sway.amp, 0, -sway.amp, 0] }}
+        transition={
+          reduce
+            ? { duration: 0 }
+            : { duration: sway.period, delay: sway.delay, repeat: Infinity, ease: "easeInOut" }
+        }
       >
-        <Link
-          ref={linkRef}
-          href={`/work/${project.slug}`}
-          draggable={false}
-          onClick={onClick}
-          onFocus={() => {
-            setHot(true);
-            onFocus();
-          }}
-          onBlur={() => setHot(false)}
-          onMouseEnter={() => setHot(true)}
-          onMouseLeave={() => setHot(false)}
-          className="group relative flex select-none flex-col rounded-[26px] bg-white p-[7%] transition-shadow duration-300 focus-visible:outline-offset-4"
-          style={{
-            height: cardH,
-            border: `1.5px solid ${project.accent}`,
-            boxShadow: raised
-              ? `0 28px 50px -24px ${project.accent}55, 0 10px 24px -14px rgba(10,10,12,0.18)`
-              : "0 14px 30px -26px rgba(10,10,12,0.25)",
-          }}
+        {/* Connector: its length carries the scroll drift and the hover lift. */}
+        <motion.div aria-hidden className="mx-auto w-[1.5px] bg-cable" style={{ height: connector }} />
+
+        <motion.div
+          initial={false}
+          animate={{ rotate: hot && !reduce ? (index % 2 ? 0.9 : -0.9) : 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 18 }}
+          style={{ transformOrigin: "50% 0%" }}
         >
-          {/* Pin where the connector clips onto the card */}
-          <span
-            aria-hidden
-            className="absolute left-1/2 top-0 size-[15px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d6d6da] ring-[3px] ring-white"
-          />
+          <Link
+            ref={linkRef}
+            href={`/work/${project.slug}`}
+            draggable={false}
+            onClick={onClick}
+            onFocus={() => {
+              setHot(true);
+              onFocus();
+            }}
+            onBlur={() => setHot(false)}
+            onMouseEnter={() => setHot(true)}
+            onMouseLeave={() => setHot(false)}
+            className="group relative flex select-none flex-col rounded-[26px] bg-white p-[7%] transition-shadow duration-300 focus-visible:outline-offset-4"
+            style={{
+              height: cardH,
+              border: `1.5px solid ${project.accent}`,
+              boxShadow: raised
+                ? `0 28px 50px -24px ${project.accent}55, 0 10px 24px -14px rgba(10,10,12,0.18)`
+                : "0 14px 30px -26px rgba(10,10,12,0.25)",
+            }}
+          >
+            {/* Pin where the connector clips onto the card */}
+            <span
+              aria-hidden
+              className="absolute left-1/2 top-0 size-[15px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d6d6da] ring-[3px] ring-white"
+            />
 
-          <ProjectMedia
-            image={project.cover}
-            accent={project.accent}
-            label="Cover image"
-            sizes={`${cardW}px`}
-            compact
-            className="aspect-[1.3] w-full shrink-0 rounded-[20px]"
-          />
+            <ProjectMedia
+              image={project.cover}
+              accent={project.accent}
+              label="Cover image"
+              sizes={`${cardW}px`}
+              compact
+              className="aspect-[1.3] w-full shrink-0 rounded-[20px]"
+            />
 
-          <div className="mt-[7%] flex min-h-0 flex-1 flex-col">
-            <h3
-              className="font-semibold leading-[1.1] tracking-[-0.045em] text-ink"
-              style={{ fontSize: titleSize }}
-            >
-              {project.cardTitle}
-            </h3>
-            <p
-              className="mt-1.5 line-clamp-2 leading-snug tracking-[-0.01em] text-mute"
-              style={{ fontSize: metaSize }}
-            >
-              {project.summary}
-            </p>
-
-            <div className="mt-auto flex items-center justify-between pt-2">
-              {isConcept ? (
-                <span
-                  className="rounded-full px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.08em]"
-                  style={{ background: `${project.accent}1a`, color: project.accent }}
-                >
-                  {project.statusLabel}
-                </span>
-              ) : (
-                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-mute">
-                  Case study
-                </span>
-              )}
-              <span
-                aria-hidden
-                className="flex size-7 items-center justify-center rounded-full border border-line text-ink transition-all duration-300 group-hover:border-transparent group-hover:text-white group-focus-visible:border-transparent group-focus-visible:text-white"
-                style={{ background: hot ? project.accent : "transparent" }}
+            <div className="mt-[7%] flex min-h-0 flex-1 flex-col">
+              <h3
+                className="font-semibold leading-[1.1] tracking-[-0.045em] text-ink"
+                style={{ fontSize: titleSize }}
               >
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                  <path d="M3 9L9 3M9 3H4M9 3V8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              </span>
+                {project.cardTitle}
+              </h3>
+              <p
+                className="mt-1.5 line-clamp-2 leading-snug tracking-[-0.01em] text-mute"
+                style={{ fontSize: metaSize }}
+              >
+                {project.summary}
+              </p>
+
+              <div className="mt-auto flex items-center justify-between pt-2">
+                {isConcept ? (
+                  <span
+                    className="rounded-full px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.08em]"
+                    style={{ background: `${project.accent}1a`, color: project.accent }}
+                  >
+                    {project.statusLabel}
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-mute">
+                    Case study
+                  </span>
+                )}
+                <span
+                  aria-hidden
+                  className="flex size-7 items-center justify-center rounded-full border border-line text-ink transition-all duration-300 group-hover:border-transparent group-hover:text-white group-focus-visible:border-transparent group-focus-visible:text-white"
+                  style={{ background: hot ? project.accent : "transparent" }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M3 9L9 3M9 3H4M9 3V8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+        </motion.div>
       </motion.div>
     </motion.div>
   );

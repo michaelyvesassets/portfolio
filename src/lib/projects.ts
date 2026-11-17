@@ -51,16 +51,6 @@ export const projects: Project[] = [
     accent: "#2bb3ef",
   },
   {
-    slug: "flora-website",
-    name: "Flora Website",
-    cardTitle: "Flora Website",
-    summary: "Consumer wellness e-commerce website.",
-    category: "Wellness · E-commerce",
-    platform: "Web",
-    status: "case-study",
-    accent: "#ff2da8",
-  },
-  {
     slug: "ufaild",
     name: "UFAILD",
     cardTitle: "UFAILD — Habit Tracker",
@@ -69,6 +59,16 @@ export const projects: Project[] = [
     platform: "iOS",
     status: "case-study",
     accent: "#ff4d4f",
+  },
+  {
+    slug: "flora-website",
+    name: "Flora Website",
+    cardTitle: "Flora Website",
+    summary: "Consumer wellness e-commerce website.",
+    category: "Wellness · E-commerce",
+    platform: "Web",
+    status: "case-study",
+    accent: "#ff2da8",
   },
   {
     slug: "flora-app",

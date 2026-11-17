@@ -6,15 +6,17 @@ export default function Home() {
   return (
     <>
       <section className="mx-auto w-full max-w-[1440px] px-5 pt-16 sm:px-8 md:pt-24 lg:px-14 lg:pt-28">
-        <h1 className="ml-[0.02em] text-ink">
-          <span className="block text-[clamp(2.6rem,6.4vw,6.25rem)] font-extralight leading-[0.95] tracking-[-0.07em] text-ink-soft">
-            I Design &amp; Build
-          </span>
-          <span className="mt-[0.02em] block text-[clamp(3rem,8.2vw,8rem)] font-bold italic leading-[0.98] tracking-[-0.075em]">
+        {/* Line 1: ~80px at 1440px wide (capped at 84px), scaling down on phones.
+            Line 2 is 1.18× line 1. Tight line-height pulls the two lines together as in the Figma. */}
+        {/* Letter-spacing is set per line: an em value set on the h1 would be inherited as
+            fixed px and come out looser on the larger second line. */}
+        <h1 className="text-[clamp(2rem,5.6vw,5.25rem)] font-light leading-[0.98]">
+          <span className="block tracking-[-0.06em] text-ink">I Design &amp; Build</span>
+          <span className="-mt-[0.06em] block text-[1.18em] italic leading-[0.98] tracking-[-0.06em] text-headline-soft">
             Digital Products
             <span
               aria-hidden
-              className="ml-[0.04em] inline-block size-[0.13em] rounded-full bg-accent align-baseline"
+              className="ml-[0.05em] inline-block size-[0.12em] rounded-full bg-accent align-baseline"
             />
             <span className="sr-only">.</span>
           </span>
