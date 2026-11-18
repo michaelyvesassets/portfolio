@@ -15,15 +15,6 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
   return { title: project.name, description: project.summary };
 }
 
-function Placeholder({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="rounded-2xl border border-dashed border-line bg-wash/60 px-5 py-4 text-[15px] leading-relaxed text-mute">
-      <span className="mr-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-soft">Placeholder</span>
-      {children}
-    </p>
-  );
-}
-
 export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]">) {
   const { slug } = await params;
   const project = getProject(slug);
@@ -39,17 +30,11 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
     { label: "Year", value: project.year },
   ];
 
-  const sections = isConcept
-    ? [
-        { title: "Intent", body: "Why the companion app is planned and how it relates to the Flora website." },
-        { title: "Current stage", body: "What exists today (e.g. research, sketches, early prototypes)." },
-        { title: "Next steps", body: "What is planned next. Only describe features as planned, not shipped." },
-      ]
-    : [
-        { title: "Challenge", body: "The problem this product addresses and who it is for." },
-        { title: "Process", body: "Research, design decisions, iterations and technical approach." },
-        { title: "Outcome", body: "Verified results only — no metrics are shown until they are confirmed." },
-      ];
+  const sections = [
+    { title: "Challenge", paragraphs: project.caseStudy.challenge },
+    { title: "Process", paragraphs: project.caseStudy.process },
+    { title: "Outcome", paragraphs: project.caseStudy.outcome },
+  ];
 
   return (
     <article className="mx-auto w-full max-w-[1440px] px-5 pt-14 sm:px-8 md:pt-20 lg:px-14">
@@ -113,7 +98,11 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
               <span className="text-[13px] tabular-nums tracking-normal text-mute">{String(i + 1).padStart(2, "0")}</span>
               {s.title}
             </h2>
-            <Placeholder>{s.body}</Placeholder>
+            <div className="max-w-[62ch] space-y-5 text-[clamp(1rem,1.25vw,1.125rem)] leading-[1.7] tracking-[-0.01em] text-ink-soft">
+              {s.paragraphs.map((text) => (
+                <p key={text}>{text}</p>
+              ))}
+            </div>
           </section>
         ))}
       </div>

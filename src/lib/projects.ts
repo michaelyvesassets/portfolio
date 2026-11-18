@@ -40,6 +40,12 @@ export type Project = {
   cover?: ProjectImage;
   /** Image for the hanging card only; falls back to `cover`. */
   cardImage?: ProjectImage;
+  /** Case-study copy: one string per paragraph, supplied by Michael. */
+  caseStudy: {
+    challenge: string[];
+    process: string[];
+    outcome: string[];
+  };
   /**
    * Back of the hanging card (revealed by the flip). Written only from the supplied
    * brief and the real screens shown on each card — no invented metrics or features.
@@ -63,6 +69,18 @@ export const projects: Project[] = [
     platform: "Mobile application",
     status: "case-study",
     accent: "#2bb3ef",
+    caseStudy: {
+      challenge: [
+        "Travelling and meeting new people often relies on fragmented experiences — social platforms, group chats, event listings, and chance encounters. I wanted to create a more intentional way for people to connect through shared activities and real-world experiences.",
+      ],
+      process: [
+        "I designed and developed Meza as an iOS application combining social discovery, hosted dining tables, and location-based quests. I worked across the product lifecycle, from defining the user experience and designing interfaces to implementing core functionality, subscription features, and city-specific content.",
+        "I also developed a scalable quest-content system to support expansion into multiple cities, using AI-assisted workflows to accelerate development and iteration.",
+      ],
+      outcome: [
+        "Launched Meza on the Apple App Store, reaching approximately 1,000 downloads through limited organic marketing. The project demonstrates my ability to independently design, build, and release a consumer-facing application with multiple interconnected features.",
+      ],
+    },
     back: {
       blurb: "Meet travellers nearby, discover local events and plan experiences together, all from one live city map.",
       tags: ["Mobile app", "Social", "Travel"],
@@ -85,6 +103,19 @@ export const projects: Project[] = [
     platform: "iOS",
     status: "case-study",
     accent: "#ff4d4f",
+    caseStudy: {
+      challenge: [
+        "Many habit-tracking applications focus heavily on productivity metrics, complicated dashboards, and maintaining perfect streaks. I wanted to explore a simpler, more approachable experience that encourages consistency without making occasional setbacks feel like failure.",
+      ],
+      process: [
+        "I designed and developed UFAILD around a streamlined habit-tracking experience, prioritising straightforward navigation, clear progress feedback, and an accessible interface.",
+        "The development process focused on translating a minimal product concept into a functional iOS application, using rapid prototyping and AI-assisted development to refine the interface and user experience.",
+      ],
+      outcome: [
+        "Developed UFAILD into a functional iOS application, demonstrating my ability to turn a focused product idea into a usable mobile experience.",
+        "The project strengthened my approach to simplifying interfaces, prioritising essential features, and building products around everyday user behaviour.",
+      ],
+    },
     back: {
       blurb: "An honest habit tracker for iOS: plan your day, then see exactly what got done and what failed.",
       tags: ["iOS", "Habits", "Productivity"],
@@ -107,6 +138,20 @@ export const projects: Project[] = [
     platform: "Web",
     status: "case-study",
     accent: "#ff2da8",
+    caseStudy: {
+      challenge: [
+        "Sexual wellness products are often presented through either overly clinical branding or outdated visual conventions. I wanted to develop a more contemporary digital experience that makes sexual wellness feel approachable, considered, and visually distinctive.",
+      ],
+      process: [
+        "I established Flora's digital brand direction and designed and developed a responsive e-commerce website using Next.js and React.",
+        "The experience combines product storytelling, interactive components, educational content, and a custom sizing interface. I focused on creating cohesive desktop and mobile experiences while balancing visual experimentation with usability.",
+        "AI-assisted development helped accelerate implementation, allowing me to concentrate on design decisions, interaction details, and product presentation.",
+      ],
+      outcome: [
+        "Created a responsive, interactive website that establishes Flora's digital identity and provides a foundation for future e-commerce functionality.",
+        "The project showcases my ability to combine brand development, UI/UX design, front-end engineering, and interactive product experiences.",
+      ],
+    },
     back: {
       blurb: "A candid storefront for Flora's sexual-wellness range, introducing its test kits and condoms.",
       tags: ["Web", "E-commerce", "Wellness"],
@@ -132,6 +177,20 @@ export const projects: Project[] = [
     status: "concept",
     statusLabel: "Concept · In development",
     accent: "#7b86ff",
+    caseStudy: {
+      challenge: [
+        "Sexual health information, product selection, and personal wellness management are often spread across disconnected services. I wanted to explore how a single digital product could make these experiences more accessible and connected.",
+      ],
+      process: [
+        "I developed the product direction for a companion application within the Flora ecosystem.",
+        "The concept explores a unified experience for sexual wellness education, product discovery, and future integration with connected at-home STI testing technology.",
+        "The design process focuses on accessibility, privacy, intuitive navigation, and creating a visual language consistent with the Flora brand.",
+      ],
+      outcome: [
+        "Established an initial product concept and design direction for a future Flora companion application.",
+        "The project demonstrates my ability to think beyond individual interfaces and plan connected digital experiences across hardware, software, and consumer products.",
+      ],
+    },
     back: {
       blurb: "A planned companion to the Flora website, exploring discreet product subscriptions and guided onboarding.",
       tags: ["Concept", "Mobile app", "Wellness"],
