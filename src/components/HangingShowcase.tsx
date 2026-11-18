@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   animate,
   motion,
@@ -110,7 +111,8 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
   const reduce = useReducedMotion() ?? false;
 
   const viewportRef = useRef<HTMLDivElement>(null);
-  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  // Each card registers how to focus its currently visible face (front or back).
+  const focusers = useRef<((() => void) | null)[]>([]);
   const dragged = useRef(false);
 
   const [measured, setMeasured] = useState<number | null>(null);
@@ -164,7 +166,7 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
       const next = clamp(i, 0, count - 1);
       setInteracted(true);
       setActive(next);
-      if (focus) linkRefs.current[next]?.focus({ preventScroll: true });
+      if (focus) focusers.current[next]?.();
     },
     [count],
   );
@@ -238,15 +240,13 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
               swing={swing}
               progress={progress}
               highlighted={interacted && i === active}
-              linkRef={(el) => {
-                linkRefs.current[i] = el;
+              registerFocus={(fn) => {
+                focusers.current[i] = fn;
               }}
               onFocus={() => {
                 if (i !== active) setActive(i);
               }}
-              onClick={(e) => {
-                if (dragged.current) e.preventDefault();
-              }}
+              isDragged={() => dragged.current}
             />
           ))}
         </motion.div>
@@ -314,13 +314,24 @@ type HangerProps = {
   /** Scroll drift factor: 0 at page top → 1.2 after scrolling 800px. */
   progress: MotionValue<number>;
   highlighted: boolean;
-  linkRef: (el: HTMLAnchorElement | null) => void;
+  /** Lets the carousel focus whichever face is currently showing. */
+  registerFocus: (fn: (() => void) | null) => void;
   onFocus: () => void;
-  onClick: (e: React.MouseEvent) => void;
+  /** True right after a carousel drag, so the release doesn't count as a tap. */
+  isDragged: () => boolean;
 };
 
 const LIFT = 12;
 const MIN_CONNECTOR = 10;
+/** ~0.7s with a touch of overshoot: reads as a physical card, never a spin. */
+const FLIP_TRANSITION = { type: "spring", duration: 0.7, bounce: 0.12 } as const;
+const PERSPECTIVE = 1100;
+
+const arrowIcon = (
+  <svg aria-hidden width="11" height="11" viewBox="0 0 12 12" fill="none">
+    <path d="M3 9L9 3M9 3H4M9 3V8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
 
 function Hanger({
   project,
@@ -334,18 +345,31 @@ function Hanger({
   swing,
   progress,
   highlighted,
-  linkRef,
+  registerFocus,
   onFocus,
-  onClick,
+  isDragged,
 }: HangerProps) {
-  const [hot, setHot] = useState(false);
+  const [hot, setHot] = useState(false); // mouse over or keyboard focus inside
+  const [hoverFlip, setHoverFlip] = useState(false); // desktop: flipped while hovered
+  const [pinned, setPinned] = useState(false); // tap / keyboard: flipped until dismissed
+  const flipped = hoverFlip || pinned;
+  const raised = hot || highlighted || flipped;
+
   const sway = SWAY[index % SWAY.length];
   const scroll = SCROLL[index % SCROLL.length];
-  const raised = hot || highlighted;
   const isConcept = project.status === "concept";
+  const number = String(index + 1).padStart(2, "0");
 
   const titleSize = clamp(cardW * 0.068, 15, 21);
   const metaSize = clamp(cardW * 0.046, 12, 14);
+
+  const router = useRouter();
+  const href = `/work/${project.slug}`;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const frontRef = useRef<HTMLButtonElement>(null);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  const focusAfterFlip = useRef<"front" | "back" | null>(null);
+  const lastPointer = useRef<string>("");
 
   // Connector length = designed drop − scroll drift − hover lift. Every input is a
   // motion value, so scrolling and hovering compose without re-rendering React.
@@ -367,11 +391,51 @@ function Hanger({
   );
   const scrollSwing = useTransform(swing, (deg) => (reduce ? 0 : deg * scroll.swing));
 
+  // Carousel arrow keys focus the visible face.
+  useEffect(() => {
+    registerFocus(() => (flipped ? ctaRef : frontRef).current?.focus({ preventScroll: true }));
+    return () => registerFocus(null);
+  }, [flipped, registerFocus]);
+
+  // Keyboard flips move focus onto the newly visible face.
+  useEffect(() => {
+    const target = focusAfterFlip.current;
+    focusAfterFlip.current = null;
+    if (target === "back" && flipped) ctaRef.current?.focus({ preventScroll: true });
+    if (target === "front" && !flipped) frontRef.current?.focus({ preventScroll: true });
+  }, [flipped]);
+
+  // A tapped/pinned card returns to its front when the user taps anywhere else.
+  useEffect(() => {
+    if (!pinned) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!cardRef.current?.contains(e.target as Node)) setPinned(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [pinned]);
+
+  const showFront = (fromKeyboard: boolean) => {
+    if (fromKeyboard) focusAfterFlip.current = "front";
+    setPinned(false);
+    setHoverFlip(false);
+  };
+
+  const faceClass = "absolute inset-0 overflow-hidden rounded-[26px] transition-shadow duration-300";
+  const faceStyle: React.CSSProperties = {
+    border: `1.5px solid ${project.accent}`,
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+    boxShadow: raised
+      ? `0 28px 50px -24px ${project.accent}55, 0 10px 24px -14px rgba(10,10,12,0.18)`
+      : "0 14px 30px -26px rgba(10,10,12,0.25)",
+  };
+
   return (
     <motion.div
       role="group"
       aria-roledescription="slide"
-      aria-label={`${index + 1} of ${count}`}
+      aria-label={`${index + 1} of ${count}: ${project.name}`}
       className="absolute"
       // Both rotations pivot on the exact point where the connector meets the cable,
       // so the card can swing freely without ever detaching from it.
@@ -401,81 +465,199 @@ function Hanger({
           transition={{ type: "spring", stiffness: 260, damping: 18 }}
           style={{ transformOrigin: "50% 0%" }}
         >
-          <Link
-            ref={linkRef}
-            href={`/work/${project.slug}`}
-            draggable={false}
-            onClick={onClick}
+          {/* Flip stage: owns the perspective. The 2D hanging transforms above and the
+              3D flip below live on separate elements, so they never fight. */}
+          <div
+            ref={cardRef}
+            className="relative select-none"
+            style={{ height: cardH, perspective: PERSPECTIVE }}
+            onPointerEnter={(e) => {
+              if (e.pointerType !== "mouse") return;
+              setHot(true);
+              setHoverFlip(true);
+            }}
+            onPointerLeave={(e) => {
+              if (e.pointerType !== "mouse") return;
+              setHot(false);
+              setHoverFlip(false);
+              setPinned(false);
+            }}
             onFocus={() => {
               setHot(true);
               onFocus();
             }}
-            onBlur={() => setHot(false)}
-            onMouseEnter={() => setHot(true)}
-            onMouseLeave={() => setHot(false)}
-            className="group relative flex select-none flex-col rounded-[26px] bg-white p-[7%] transition-shadow duration-300 focus-visible:outline-offset-4"
-            style={{
-              height: cardH,
-              border: `1.5px solid ${project.accent}`,
-              boxShadow: raised
-                ? `0 28px 50px -24px ${project.accent}55, 0 10px 24px -14px rgba(10,10,12,0.18)`
-                : "0 14px 30px -26px rgba(10,10,12,0.25)",
+            onBlur={(e) => {
+              const next = e.relatedTarget as Node | null;
+              if (next && cardRef.current?.contains(next)) return;
+              setHot(false);
+              // Tabbing away returns the card to its front (null = focus lost to inert, ignore).
+              if (next) setPinned(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && flipped) {
+                e.stopPropagation();
+                showFront(true);
+              }
             }}
           >
-            {/* Pin where the connector clips onto the card */}
+            {/* Pin where the connector clips on: outside the flipping element, so the
+                string stays attached at the top-centre throughout the rotation. */}
             <span
               aria-hidden
-              className="absolute left-1/2 top-0 size-[15px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d6d6da] ring-[3px] ring-white"
+              className="absolute left-1/2 top-0 z-10 size-[15px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d6d6da] ring-[3px] ring-white"
             />
 
-            <ProjectMedia
-              image={project.cover}
-              accent={project.accent}
-              label="Cover image"
-              sizes={`${cardW}px`}
-              compact
-              className="aspect-[1.7] w-full shrink-0 rounded-[18px]"
-            />
-
-            <div className="mt-[7%] flex min-h-0 flex-1 flex-col">
-              <h3
-                className="font-semibold leading-[1.1] tracking-[-0.045em] text-ink"
-                style={{ fontSize: titleSize }}
+            <motion.div
+              className="relative size-full"
+              style={{ transformStyle: "preserve-3d" }}
+              initial={false}
+              animate={{ rotateY: flipped ? 180 : 0 }}
+              transition={reduce ? { duration: 0 } : FLIP_TRANSITION}
+            >
+              {/* ---------- Front ---------- */}
+              <div
+                inert={flipped}
+                className={`${faceClass} flex flex-col bg-white p-[7%]`}
+                style={faceStyle}
               >
-                {project.cardTitle}
-              </h3>
-              <p
-                className="mt-1.5 line-clamp-2 leading-snug tracking-[-0.01em] text-mute"
-                style={{ fontSize: metaSize }}
-              >
-                {project.summary}
-              </p>
+                <ProjectMedia
+                  image={project.cardImage ?? project.cover}
+                  accent={project.accent}
+                  label="Cover image"
+                  sizes={`${cardW}px`}
+                  compact
+                  className="aspect-[1.7] w-full shrink-0 rounded-[18px]"
+                />
 
-              <div className="mt-auto flex items-center justify-between pt-2">
-                {isConcept ? (
-                  <span
-                    className="rounded-full px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.08em]"
-                    style={{ background: `${project.accent}1a`, color: project.accent }}
+                <div className="mt-[7%] flex min-h-0 flex-1 flex-col">
+                  <h3
+                    className="font-semibold leading-[1.1] tracking-[-0.045em] text-ink"
+                    style={{ fontSize: titleSize }}
                   >
-                    {project.statusLabel}
-                  </span>
-                ) : (
-                  <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-mute">
-                    Case study
-                  </span>
-                )}
-                <span
-                  aria-hidden
-                  className="flex size-7 items-center justify-center rounded-full border border-line text-ink transition-all duration-300 group-hover:border-transparent group-hover:text-white group-focus-visible:border-transparent group-focus-visible:text-white"
-                  style={{ background: hot ? project.accent : "transparent" }}
-                >
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                    <path d="M3 9L9 3M9 3H4M9 3V8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                  </svg>
-                </span>
+                    {project.cardTitle}
+                  </h3>
+                  <p
+                    className="mt-1.5 line-clamp-2 leading-snug tracking-[-0.01em] text-mute"
+                    style={{ fontSize: metaSize }}
+                  >
+                    {project.summary}
+                  </p>
+
+                  <div className="mt-auto flex items-center justify-between pt-2">
+                    {isConcept ? (
+                      <span
+                        className="rounded-full px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.08em]"
+                        style={{ background: `${project.accent}1a`, color: project.accent }}
+                      >
+                        {project.statusLabel}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-mute">
+                        Case study
+                      </span>
+                    )}
+                    {/* The flip control. Its ::after stretches over the whole face, so a
+                        tap anywhere flips; the focus ring is drawn around the full card. */}
+                    <button
+                      ref={frontRef}
+                      type="button"
+                      aria-label={`Show details for ${project.name}`}
+                      aria-expanded={flipped}
+                      onClick={(e) => {
+                        if (isDragged()) return;
+                        if (e.detail === 0) focusAfterFlip.current = "back"; // keyboard
+                        setPinned(true);
+                      }}
+                      className="flex size-7 items-center justify-center rounded-full border border-line text-ink transition-colors duration-300 after:absolute after:inset-0 after:rounded-[24px] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-accent"
+                      style={{
+                        background: hot ? project.accent : "transparent",
+                        color: hot ? "#fff" : undefined,
+                        borderColor: hot ? "transparent" : undefined,
+                      }}
+                    >
+                      {arrowIcon}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </Link>
+
+              {/* ---------- Back ---------- */}
+              <div
+                inert={!flipped}
+                className={`${faceClass} flex cursor-pointer flex-col p-[7%]`}
+                style={{ ...faceStyle, background: project.back.gradient, transform: "rotateY(180deg)" }}
+                // Mouse users can click anywhere on the back to open the case study. Touch
+                // and keyboard users use the explicit "View Case Study" link instead, so a
+                // stray tap on the back never navigates by accident.
+                onPointerDown={(e) => (lastPointer.current = e.pointerType)}
+                onClick={(e) => {
+                  if (lastPointer.current !== "mouse" || isDragged()) return;
+                  if ((e.target as HTMLElement).closest("a, button")) return;
+                  router.push(href);
+                }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="pt-1.5 text-[10.5px] font-medium uppercase leading-snug tracking-[0.12em] text-ink-soft/80">
+                    {/* Non-breaking hyphens so "E-commerce" never splits across lines. */}
+                    {number} · {isConcept ? "Concept" : project.category.replace(/-/g, "‑")}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Show front of ${project.name} card`}
+                    onClick={(e) => showFront(e.detail === 0)}
+                    className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border border-white bg-white/70 text-ink-soft backdrop-blur transition-colors hover:bg-white"
+                  >
+                    <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path
+                        d="M2.5 4.5h5.25a2.25 2.25 0 010 4.5H5M2.5 4.5L4.5 2.5M2.5 4.5l2 2"
+                        stroke="currentColor"
+                        strokeWidth="1.3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <h3
+                  className="mt-2 font-semibold leading-[1.05] tracking-[-0.05em] text-ink"
+                  style={{ fontSize: titleSize * 1.15 }}
+                >
+                  {project.name}
+                </h3>
+                <p
+                  className="mt-2 line-clamp-4 leading-snug tracking-[-0.01em] text-ink-soft"
+                  style={{ fontSize: metaSize - 0.5 }}
+                >
+                  {project.back.blurb}
+                </p>
+
+                <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Tags">
+                  {project.back.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full bg-white/75 px-2 py-0.5 text-[10.5px] font-medium tracking-[0.02em] text-ink-soft"
+                      style={{ boxShadow: `inset 0 0 0 1px ${project.accent}40` }}
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  ref={ctaRef}
+                  href={href}
+                  draggable={false}
+                  onClick={(e) => {
+                    if (isDragged()) e.preventDefault();
+                  }}
+                  className="mt-auto inline-flex items-center gap-2 self-start rounded-full bg-ink px-3.5 py-2 text-[12.5px] font-medium tracking-[-0.01em] text-white transition-transform duration-300 hover:-translate-y-px"
+                >
+                  View Case Study {arrowIcon}
+                </Link>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       </motion.div>
     </motion.div>

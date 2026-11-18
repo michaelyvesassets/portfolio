@@ -29,6 +29,7 @@ export function ProjectMedia({ image, accent, label, sizes, className = "", prio
           priority={priority}
           draggable={false}
           className="object-cover"
+          style={image.position ? { objectPosition: image.position } : undefined}
         />
       </div>
     );
