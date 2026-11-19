@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ProjectBrowserHero } from "@/components/ProjectBrowserHero";
+import { ProjectKeyScreens } from "@/components/ProjectKeyScreens";
 import { ProjectMedia } from "@/components/ProjectMedia";
-import { getNextProject, getProject, projects } from "@/lib/projects";
+import { ProjectPhoneHero } from "@/components/ProjectPhoneHero";
+import { getNextProject, getProject, projects, type Project } from "@/lib/projects";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -13,6 +16,11 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
   const project = getProject(slug);
   if (!project) return {};
   return { title: project.name, description: project.summary };
+}
+
+/** Map the showcase's hero order (indices into `screens`) to the three phones. */
+function heroPhones({ screens, heroOrder: [l, c, r] = [2, 0, 1] }: NonNullable<Project["showcase"]>) {
+  return { left: screens[l], centre: screens[c], right: screens[r] };
 }
 
 export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]">) {
@@ -82,15 +90,32 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
         </p>
       )}
 
-      <ProjectMedia
-        image={project.cover}
-        accent={project.accent}
-        label="Hero image"
-        sizes="(min-width: 1440px) 1340px, 100vw"
-        priority
-        fit="intrinsic"
-        className={`mt-12 w-full rounded-[28px] border border-line md:mt-16 ${project.cover ? "" : "aspect-[16/9]"}`}
-      />
+      {project.showcase?.device === "browser" && project.showcase.heroScreens ? (
+        <ProjectBrowserHero
+          windows={{ main: project.showcase.heroScreens[0], secondary: project.showcase.heroScreens[1] }}
+          background={project.showcase.heroBackground}
+          glow={project.showcase.heroGlow}
+          className="mt-12 aspect-[4/5] w-full rounded-[28px] border border-line sm:aspect-[16/10] md:mt-16 lg:aspect-[16/9]"
+        />
+      ) : project.showcase ? (
+        <ProjectPhoneHero
+          phones={heroPhones(project.showcase)}
+          background={project.showcase.heroBackground}
+          glow={project.showcase.heroGlow}
+          island={project.showcase.island}
+          className="mt-12 aspect-[4/5] w-full rounded-[28px] border border-line sm:aspect-[16/10] md:mt-16 lg:aspect-[16/9]"
+        />
+      ) : (
+        <ProjectMedia
+          image={project.cover}
+          accent={project.accent}
+          label="Hero image"
+          sizes="(min-width: 1440px) 1340px, 100vw"
+          priority
+          fit="intrinsic"
+          className={`mt-12 w-full rounded-[28px] border border-line md:mt-16 ${project.cover ? "" : "aspect-[16/9]"}`}
+        />
+      )}
 
       <div className="mt-20 grid gap-16 md:mt-28">
         {sections.map((s, i) => (
@@ -108,24 +133,16 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
         ))}
       </div>
 
-      <section aria-labelledby="screens" className="mt-24">
-        <h2 id="screens" className="text-[12px] font-medium uppercase tracking-[0.12em] text-mute">
-          {isConcept ? "Explorations" : "Key screens"}
-        </h2>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }, (_, i) => project.gallery?.[i]).map((img, i) => (
-            <ProjectMedia
-              key={i}
-              image={img}
-              accent={project.accent}
-              label={isConcept ? `Concept ${i + 1}` : `Screen ${i + 1}`}
-              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              fit="contain"
-              className="aspect-[4/5] w-full rounded-[22px]"
-            />
-          ))}
-        </div>
-      </section>
+      <ProjectKeyScreens
+        heading={isConcept ? "Explorations" : "Key screens"}
+        screens={project.showcase?.screens.map((image) => ({ image }))}
+        tileBackground={project.showcase?.tileBackground}
+        island={project.showcase?.island}
+        device={project.showcase?.device}
+        gallery={project.gallery}
+        accent={project.accent}
+        placeholderLabel={(i) => (isConcept ? `Concept ${i + 1}` : `Screen ${i + 1}`)}
+      />
 
       <nav aria-label="Next project" className="mt-28 border-t border-line pt-10">
         <Link href={`/work/${next.slug}`} className="group flex flex-col gap-2">

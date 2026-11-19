@@ -89,3 +89,25 @@ body {
     }
   }
 }
+
+/*
+ * One-off entrance (Flora App hero phones): fade in while rising slightly, then
+ * stay put. Animates `translate`, not `transform`, so it composes with each
+ * element's own positioning transform. Stagger with --delay.
+ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise-in {
+    animation: rise-in 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms) both;
+  }
+}
