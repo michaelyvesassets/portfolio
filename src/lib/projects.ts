@@ -36,9 +36,14 @@ export type Project = {
   statusLabel?: string;
   /** Outline accent, from the Figma design. */
   accent: string;
-  /** Unconfirmed fields stay undefined and show as placeholders. */
-  role?: string;
-  year?: string;
+  /** Case-study header metadata (supplied). Separate from `category`/`platform`, which the homepage uses. */
+  details: {
+    category: string;
+    platform: string;
+    role: string;
+    year: string;
+    status: "launched" | "in-development" | "concept";
+  };
   cover?: ProjectImage;
   /** Image for the hanging card only; falls back to `cover`. */
   cardImage?: ProjectImage;
@@ -93,6 +98,13 @@ export const projects: Project[] = [
     platform: "Mobile application",
     status: "case-study",
     accent: "#2bb3ef",
+    details: {
+      category: "Social · Travel",
+      platform: "iOS Application",
+      role: "Founder · Full-Stack Developer",
+      year: "2026",
+      status: "launched",
+    },
     caseStudy: {
       challenge: [
         "Travelling and meeting new people often relies on fragmented experiences — social platforms, group chats, event listings, and chance encounters. I wanted to create a more intentional way for people to connect through shared activities and real-world experiences.",
@@ -155,6 +167,13 @@ export const projects: Project[] = [
     platform: "iOS",
     status: "case-study",
     accent: "#ff4d4f",
+    details: {
+      category: "AI · Productivity",
+      platform: "iOS Application",
+      role: "Founder · AI Product Developer",
+      year: "2026",
+      status: "launched",
+    },
     caseStudy: {
       challenge: [
         "Most productivity apps reward users for checking boxes, regardless of whether meaningful work was actually completed. They rely on self-reported progress, positive reinforcement, and streaks that can easily become meaningless.",
@@ -223,6 +242,13 @@ export const projects: Project[] = [
     platform: "Web",
     status: "case-study",
     accent: "#ff2da8",
+    details: {
+      category: "Wellness · E-commerce",
+      platform: "Web Application",
+      role: "Founder · Full-Stack Developer & Designer",
+      year: "2026",
+      status: "in-development",
+    },
     caseStudy: {
       challenge: [
         "Sexual wellness products are often presented through either overly clinical branding or outdated visual conventions. I wanted to develop a more contemporary digital experience that makes sexual wellness feel approachable, considered, and visually distinctive.",
@@ -304,6 +330,13 @@ export const projects: Project[] = [
     status: "concept",
     statusLabel: "Concept · In development",
     accent: "#7b86ff",
+    details: {
+      category: "Wellness · Mobile",
+      platform: "iOS App Concept",
+      role: "Founder · Product Designer & Developer",
+      year: "2026",
+      status: "concept",
+    },
     caseStudy: {
       challenge: [
         "Sexual health information, product selection, and personal wellness management are often spread across disconnected services. I wanted to explore how a single digital product could make these experiences more accessible and connected.",
