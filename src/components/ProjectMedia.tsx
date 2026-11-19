@@ -11,16 +11,43 @@ type Props = {
   priority?: boolean;
   /** Compact placeholder label for small surfaces like cards. */
   compact?: boolean;
+  /**
+   * "cover" (default) fills a fixed-size box and may crop. "intrinsic" sizes the
+   * box from the image's own aspect ratio so the whole artwork is shown, uncropped.
+   * "contain" keeps the box's shape and fits the whole image inside it, filling any
+   * spare space with `image.background`.
+   */
+  fit?: "cover" | "contain" | "intrinsic";
 };
 
 /**
  * Renders a real, optimised image when one is provided; otherwise a clearly
  * labelled placeholder tinted with the project accent. Never fakes a screenshot.
  */
-export function ProjectMedia({ image, accent, label, sizes, className = "", priority, compact }: Props) {
+export function ProjectMedia({ image, accent, label, sizes, className = "", priority, compact, fit = "cover" }: Props) {
+  if (image && fit === "intrinsic") {
+    return (
+      <div className={`overflow-hidden bg-wash ${className}`}>
+        <Image
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          sizes={sizes}
+          priority={priority}
+          draggable={false}
+          className="block h-auto w-full"
+        />
+      </div>
+    );
+  }
+
   if (image) {
     return (
-      <div className={`relative overflow-hidden bg-wash ${className}`}>
+      <div
+        className={`relative overflow-hidden bg-wash ${className}`}
+        style={image.background ? { background: image.background } : undefined}
+      >
         <Image
           src={image.src}
           alt={image.alt}
@@ -28,7 +55,7 @@ export function ProjectMedia({ image, accent, label, sizes, className = "", prio
           sizes={sizes}
           priority={priority}
           draggable={false}
-          className="object-cover"
+          className={fit === "contain" ? "object-contain" : "object-cover"}
           style={image.position ? { objectPosition: image.position } : undefined}
         />
       </div>

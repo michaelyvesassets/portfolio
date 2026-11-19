@@ -88,7 +88,8 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
         label="Hero image"
         sizes="(min-width: 1440px) 1340px, 100vw"
         priority
-        className="mt-12 aspect-[16/9] w-full rounded-[28px] border border-line md:mt-16"
+        fit="intrinsic"
+        className={`mt-12 w-full rounded-[28px] border border-line md:mt-16 ${project.cover ? "" : "aspect-[16/9]"}`}
       />
 
       <div className="mt-20 grid gap-16 md:mt-28">
@@ -112,13 +113,14 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
           {isConcept ? "Explorations" : "Key screens"}
         </h2>
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {(project.gallery ?? [undefined, undefined, undefined]).map((img, i) => (
+          {Array.from({ length: 3 }, (_, i) => project.gallery?.[i]).map((img, i) => (
             <ProjectMedia
               key={i}
               image={img}
               accent={project.accent}
               label={isConcept ? `Concept ${i + 1}` : `Screen ${i + 1}`}
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              fit="contain"
               className="aspect-[4/5] w-full rounded-[22px]"
             />
           ))}

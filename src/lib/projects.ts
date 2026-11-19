@@ -16,6 +16,8 @@ export type ProjectImage = {
   height: number;
   /** Optional CSS object-position focal point when cropped (default: centred). */
   position?: string;
+  /** Optional fill behind letterboxed ("contain") images; match the artwork's edge colour. */
+  background?: string;
 };
 
 export type ProjectStatus = "case-study" | "concept";
@@ -87,12 +89,41 @@ export const projects: Project[] = [
       gradient:
         "radial-gradient(120% 80% at 85% 0%, rgba(43,179,239,0.38) 0%, rgba(43,179,239,0) 58%), linear-gradient(165deg, #dcf2ff 0%, #f0f9ff 48%, #ffffff 100%)",
     },
+    cover: {
+      src: "/projects/mainy1.png",
+      alt: "Three Meza app screens: a group chat for a hosted table, the live city map of events and travellers, and a 3D map quest",
+      width: 2200,
+      height: 1231,
+    },
     cardImage: {
       src: "/projects/meza/cover2.png",
       alt: "Meza app screens: a city map of nearby events and a grid of travellers nearby",
       width: 2037,
       height: 1150,
     },
+    gallery: [
+      {
+        src: "/projects/bottommeza1.png",
+        alt: "Meza home screen: a live map of New York with event pins, travellers nearby, a leaderboard and a list of open events",
+        width: 1007,
+        height: 1350,
+        background: "#87cdfb",
+      },
+      {
+        src: "/projects/bottommeza2.png",
+        alt: "Meza Nearby screen: a grid of travellers close by, each with their distance and an add or connected button",
+        width: 971,
+        height: 1333,
+        background: "#87cdfb",
+      },
+      {
+        src: "/projects/bottommeza3.png",
+        alt: "Meza quest screen: \"The Ural Blueprint\" clue on a 3D city map with a highlighted walking route",
+        width: 984,
+        height: 1322,
+        background: "#87cdfb",
+      },
+    ],
   },
   {
     slug: "ufaild",
