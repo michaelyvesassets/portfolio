@@ -98,22 +98,27 @@ export const projects: Project[] = [
     slug: "ufaild",
     name: "UFAILD",
     cardTitle: "UFAILD — Habit Tracker",
-    summary: "Habit-tracking iOS application.",
+    summary: "AI-Powered Accountability & Discipline App.",
     category: "Productivity · Habits",
     platform: "iOS",
     status: "case-study",
     accent: "#ff4d4f",
     caseStudy: {
       challenge: [
-        "Many habit-tracking applications focus heavily on productivity metrics, complicated dashboards, and maintaining perfect streaks. I wanted to explore a simpler, more approachable experience that encourages consistency without making occasional setbacks feel like failure.",
+        "Most productivity apps reward users for checking boxes, regardless of whether meaningful work was actually completed. They rely on self-reported progress, positive reinforcement, and streaks that can easily become meaningless.",
+        "I wanted to challenge that approach by building something deliberately uncomfortable: an accountability system that confronts procrastination, demands evidence, and forces users to reflect honestly on their actions.",
       ],
       process: [
-        "I designed and developed UFAILD around a streamlined habit-tracking experience, prioritising straightforward navigation, clear progress feedback, and an accessible interface.",
-        "The development process focused on translating a minimal product concept into a functional iOS application, using rapid prototyping and AI-assisted development to refine the interface and user experience.",
+        "I designed and developed UFAILD as an iOS application built around discipline, self-reflection, and verifiable progress.",
+        "I integrated AI APIs to analyse screenshot evidence and assess whether tasks were genuinely completed, moving beyond traditional self-reported habit tracking.",
+        "I also developed two core reflection mechanisms: a daily obituary that confronts users with how they spent the previous day, and a pre-mortem that forces them to identify what must be accomplished next.",
+        "These features were combined with deliberately confrontational notifications, recurring schedules, streak tracking, and a 28-day habit calendar.",
+        "Throughout development, I used AI-assisted workflows to accelerate implementation while maintaining a clear product philosophy: accountability over comfort, and evidence over intention.",
       ],
       outcome: [
-        "Developed UFAILD into a functional iOS application, demonstrating my ability to turn a focused product idea into a usable mobile experience.",
-        "The project strengthened my approach to simplifying interfaces, prioritising essential features, and building products around everyday user behaviour.",
+        "Successfully developed and published UFAILD on the Apple App Store as a functional iOS accountability application.",
+        "The product combines AI-powered task verification, structured self-reflection, and behavioural accountability into an experience intentionally different from conventional habit trackers.",
+        "UFAILD demonstrates my ability to integrate AI services into practical product functionality, develop a distinctive product identity, and independently take an unconventional concept from initial design through to release.",
       ],
     },
     back: {
