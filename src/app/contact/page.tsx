@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CopyEmailButton } from "@/components/CopyEmailButton";
 import { contact } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -18,46 +19,32 @@ export default function ContactPage() {
         </span>
       </h1>
 
-      <div className="mt-20 grid gap-12 border-t border-line pt-10 md:grid-cols-2">
-        <div>
-          <h2 className="text-[12px] font-medium uppercase tracking-[0.12em] text-mute">Email</h2>
-          {contact.email ? (
-            <a
-              href={`mailto:${contact.email}`}
-              className="mt-3 inline-block text-[clamp(1.5rem,3.2vw,2.75rem)] font-light tracking-[-0.05em] text-ink underline decoration-line decoration-1 underline-offset-8 transition-colors hover:decoration-ink"
-            >
-              {contact.email}
-            </a>
-          ) : (
-            <p className="mt-3 rounded-2xl border border-dashed border-line bg-wash/60 px-5 py-4 text-[15px] text-mute">
-              <span className="mr-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-soft">
-                Placeholder
-              </span>
-              Add your email in src/lib/site.ts.
-            </p>
-          )}
-        </div>
+      <p className="mt-6 max-w-md text-[clamp(1rem,1.3vw,1.125rem)] leading-relaxed tracking-[-0.01em] text-mute">
+        Open to remote opportunities, collaborations, and interesting projects.
+      </p>
 
-        <div>
-          <h2 className="text-[12px] font-medium uppercase tracking-[0.12em] text-mute">Elsewhere</h2>
-          <ul className="mt-3 divide-y divide-line border-y border-line">
-            {contact.links.map((l) => (
-              <li key={l.label} className="flex items-center justify-between py-4 text-[17px] tracking-[-0.02em]">
-                {l.href ? (
-                  <a href={l.href} target="_blank" rel="noreferrer" className="hover:text-mute">
-                    {l.label} <span aria-hidden>↗</span>
-                  </a>
-                ) : (
-                  <>
-                    <span className="text-mute">{l.label}</span>
-                    <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-mute">Link placeholder</span>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
+      <section aria-labelledby="email-heading" className="mt-16 border-t border-line pt-10 md:mt-20 md:pt-12">
+        <h2 id="email-heading" className="text-[12px] font-medium uppercase tracking-[0.12em] text-mute">
+          Get in touch
+        </h2>
+        <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-5">
+          <a
+            href={`mailto:${contact.email}`}
+            className="group inline-flex max-w-full items-start gap-[0.2em] text-[clamp(1.25rem,5.6vw,3.5rem)] font-light leading-[1.15] tracking-[-0.045em] text-ink [overflow-wrap:anywhere]"
+          >
+            <span className="min-w-0 underline decoration-line decoration-1 underline-offset-[0.18em] transition-colors duration-[250ms] group-hover:decoration-accent">
+              {contact.email}
+            </span>
+            <span
+              aria-hidden
+              className="inline-block text-[0.6em] leading-none transition-[transform,color] duration-[250ms] group-hover:translate-x-[0.12em] group-hover:-translate-y-[0.12em] group-hover:text-accent"
+            >
+              ↗
+            </span>
+          </a>
+          <CopyEmailButton email={contact.email} />
         </div>
-      </div>
+      </section>
     </div>
   );
 }
