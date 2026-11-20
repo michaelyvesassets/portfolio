@@ -50,7 +50,14 @@ export function ProjectKeyScreens({
       <h2 id="screens" className="text-[12px] font-medium uppercase tracking-[0.12em] text-mute">
         {heading}
       </h2>
-      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Phones: a native swipeable row (scroll-snap) bleeding to the screen edges,
+          with the next screen peeking in. From `sm` up: the original grid. */}
+      <div
+        tabIndex={screens ? 0 : undefined}
+        role={screens ? "region" : undefined}
+        aria-label={screens ? `${heading}, swipe for more` : undefined}
+        className="-mx-5 mt-6 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] max-sm:*:w-[78%] max-sm:*:shrink-0 max-sm:*:snap-start max-sm:*:snap-always sm:mx-0 sm:grid sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0 sm:grid-cols-2 lg:grid-cols-3 [&::-webkit-scrollbar]:hidden"
+      >
         {Array.from({ length: 3 }, (_, i) => {
           const screen = screens?.[i];
           if (screen && tileBackground) {

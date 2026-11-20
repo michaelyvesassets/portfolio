@@ -63,11 +63,14 @@ type Layout = {
 };
 
 function computeLayout(width: number, count: number): Layout {
-  const perView = width >= 1120 ? 4 : width >= 820 ? 3 : width >= 540 ? 2 : 1.18;
+  const phone = width < 540;
+  // Phones show one card with a peek of the next; cards fill more of the slot there.
+  const perView = width >= 1120 ? 4 : width >= 820 ? 3 : !phone ? 2 : 1.14;
   const step = width / perView;
   // Capped so the whole showcase fits the first screen at 1440×900.
-  const cardW = Math.round(Math.min(step * 0.84, 256));
-  const cardH = Math.round(cardW * 1.1);
+  const cardW = Math.round(Math.min(step * (phone ? 0.9 : 0.84), 256));
+  // Narrow phone cards get a little extra height so the two-line description fits.
+  const cardH = Math.round(cardW * (cardW < 245 ? 1.2 : 1.1));
   const trackWidth = step * count;
 
   // Hanging points are evenly spaced along x…
@@ -605,7 +608,7 @@ function Hanger({
                     type="button"
                     aria-label={`Show front of ${project.name} card`}
                     onClick={(e) => showFront(e.detail === 0)}
-                    className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border border-white bg-white/70 text-ink-soft backdrop-blur transition-colors hover:bg-white"
+                    className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border border-white bg-white/70 text-ink-soft backdrop-blur transition-colors before:absolute before:-inset-2 hover:bg-white"
                   >
                     <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path
@@ -705,7 +708,7 @@ function Controls({
                 onClick={() => onSelect(i)}
                 aria-label={`Show project ${i + 1}: ${p.name}`}
                 aria-current={on ? "true" : undefined}
-                className="group flex h-6 items-center px-1"
+                className="group relative flex h-6 items-center px-1 before:absolute before:inset-x-0 before:-inset-y-2.5"
               >
                 <span
                   className="block h-2 rounded-full transition-all duration-300"

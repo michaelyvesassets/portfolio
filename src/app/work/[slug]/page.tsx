@@ -58,7 +58,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
     <article className="mx-auto w-full max-w-[1440px] px-5 pt-10 sm:px-8 md:pt-14 lg:px-14">
       <Link
         href="/#work"
-        className="inline-flex items-center gap-2 text-[14px] tracking-[-0.01em] text-mute transition-colors hover:text-ink"
+        className="relative inline-flex items-center gap-2 text-[14px] tracking-[-0.01em] text-mute transition-colors before:absolute before:-inset-x-2 before:-inset-y-3 hover:text-ink"
       >
         <span aria-hidden>←</span> All work
       </Link>
@@ -132,7 +132,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
         />
       )}
 
-      <div className="mt-20 grid gap-16 md:mt-28">
+      <div className="mt-14 grid gap-12 md:mt-28 md:gap-16">
         {sections.map((s, i) => (
           <section key={s.title} className="grid gap-6 md:grid-cols-[1fr_2fr]">
             <h2 className="flex items-baseline gap-4 text-[clamp(1.6rem,3vw,2.5rem)] font-light tracking-[-0.05em] text-ink">

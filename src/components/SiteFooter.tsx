@@ -10,17 +10,17 @@ export function SiteFooter() {
         </p>
         <ul className="flex gap-6">
           <li>
-            <Link href="/#work" className="hover:text-ink">
+            <Link href="/#work" className="py-2 hover:text-ink">
               Work
             </Link>
           </li>
           <li>
-            <Link href="/about" className="hover:text-ink">
+            <Link href="/about" className="py-2 hover:text-ink">
               About
             </Link>
           </li>
           <li>
-            <Link href="/contact" className="hover:text-ink">
+            <Link href="/contact" className="py-2 hover:text-ink">
               Contact
             </Link>
           </li>

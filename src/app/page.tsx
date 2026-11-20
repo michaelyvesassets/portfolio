@@ -36,14 +36,15 @@ export default function Home() {
         <HangingShowcase projects={projects} />
 
         <div className="mt-8 flex flex-col justify-between gap-2 text-[12px] uppercase tracking-[0.12em] text-mute sm:flex-row">
-          <span>Hover to lift · Click to open</span>
+          <span className="hidden [@media(hover:hover)]:inline">Hover to lift · Click to open</span>
+          <span className="[@media(hover:hover)]:hidden">Tap to flip · Swipe to browse</span>
           <span className="hidden sm:inline">Drag, swipe or use ← → keys</span>
         </div>
       </section>
 
       <section
         aria-labelledby="index-heading"
-        className="mx-auto mt-28 w-full max-w-[1440px] px-5 sm:px-8 lg:px-14"
+        className="mx-auto mt-20 w-full max-w-[1440px] px-5 sm:px-8 md:mt-28 lg:px-14"
       >
         <h2 id="index-heading" className="text-[12px] font-medium uppercase tracking-[0.12em] text-mute">
           Index

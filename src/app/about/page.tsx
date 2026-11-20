@@ -164,7 +164,7 @@ export default function AboutPage() {
       </section>
 
       {/* 02 — About me */}
-      <section aria-labelledby="about-heading" className="reveal mt-20 grid gap-8 border-t border-line pt-10 md:mt-28 md:grid-cols-[1fr_2fr] md:gap-12">
+      <section aria-labelledby="about-heading" className="reveal mt-14 grid gap-8 border-t border-line pt-10 md:mt-28 md:grid-cols-[1fr_2fr] md:gap-12">
         <div>
           <Label n={2}>About</Label>
           <Heading id="about-heading">A little about me</Heading>
@@ -177,7 +177,7 @@ export default function AboutPage() {
       </section>
 
       {/* 03 — What I do */}
-      <section aria-labelledby="skills-heading" className="mt-20 border-t border-line pt-10 md:mt-28">
+      <section aria-labelledby="skills-heading" className="mt-14 border-t border-line pt-10 md:mt-28">
         <div className="reveal">
           <Label n={3}>Capabilities</Label>
           <Heading id="skills-heading">What I do</Heading>
@@ -206,7 +206,7 @@ export default function AboutPage() {
       </section>
 
       {/* 04 — Beyond the interface */}
-      <section aria-labelledby="systems-heading" className="mt-20 border-t border-line pt-10 md:mt-28">
+      <section aria-labelledby="systems-heading" className="mt-14 border-t border-line pt-10 md:mt-28">
         <div className="reveal grid gap-4 md:grid-cols-[1fr_2fr] md:gap-12">
           <div>
             <Label n={4}>Technical experience</Label>
@@ -273,7 +273,7 @@ export default function AboutPage() {
       </section>
 
       {/* 05 — How I work */}
-      <section aria-labelledby="approach-heading" className="mt-20 border-t border-line pt-10 md:mt-28">
+      <section aria-labelledby="approach-heading" className="mt-14 border-t border-line pt-10 md:mt-28">
         <div className="reveal">
           <Label n={5}>How I work</Label>
           <Heading id="approach-heading">My development approach</Heading>
@@ -292,7 +292,7 @@ export default function AboutPage() {
       </section>
 
       {/* 06 — Projects */}
-      <section aria-labelledby="projects-heading" className="reveal mt-20 border-t border-line pt-10 md:mt-28">
+      <section aria-labelledby="projects-heading" className="reveal mt-14 border-t border-line pt-10 md:mt-28">
         <Label n={6}>Work</Label>
         <Heading id="projects-heading">Projects</Heading>
         <ul className="mt-8 divide-y divide-line border-y border-line">
@@ -329,7 +329,7 @@ export default function AboutPage() {
       {/* 07 — Availability */}
       <section
         aria-labelledby="availability-heading"
-        className="reveal mt-20 flex flex-col gap-8 border-t border-line pt-10 md:mt-28 md:flex-row md:items-end md:justify-between"
+        className="reveal mt-14 flex flex-col gap-8 border-t border-line pt-10 md:mt-28 md:flex-row md:items-end md:justify-between"
       >
         <div>
           <p className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.12em] text-mute">

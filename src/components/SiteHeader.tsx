@@ -1,12 +1,14 @@
 import Link from "next/link";
+import { MobileNav } from "./MobileNav";
 
 const linkClass =
-  "text-[15px] font-normal tracking-[-0.02em] text-ink transition-colors hover:text-mute md:text-[17px]";
+  "py-2 text-[15px] font-normal tracking-[-0.02em] text-ink transition-colors hover:text-mute md:text-[17px]";
 
 export function SiteHeader() {
   return (
     <header className="relative z-20 mx-auto w-full max-w-[1440px] px-5 pt-6 sm:px-8 md:pt-9 lg:px-14">
-      <nav aria-label="Primary" className="grid grid-cols-[1fr_auto_1fr] items-center">
+      <MobileNav />
+      <nav aria-label="Primary" className="hidden grid-cols-[1fr_auto_1fr] items-center sm:grid">
         <ul className="flex items-center gap-5 md:gap-14">
           <li>
             <Link href="/#work" className={linkClass}>
