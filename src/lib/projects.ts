@@ -161,9 +161,9 @@ export const projects: Project[] = [
   {
     slug: "ufaild",
     name: "UFAILD",
-    cardTitle: "UFAILD — Habit Tracker",
+    cardTitle: "UFAILD — AI Accountability",
     summary: "AI-Powered Accountability & Discipline App.",
-    category: "Productivity · Habits",
+    category: "AI · Productivity",
     platform: "iOS",
     status: "case-study",
     accent: "#ff4d4f",
@@ -193,14 +193,14 @@ export const projects: Project[] = [
       ],
     },
     back: {
-      blurb: "An honest habit tracker for iOS: plan your day, then see exactly what got done and what failed.",
-      tags: ["iOS", "Habits", "Productivity"],
+      blurb: "An AI-powered discipline system combining verified task completion, brutal self-reflection, and real accountability.",
+      tags: ["iOS", "AI", "Accountability"],
       gradient:
         "radial-gradient(120% 80% at 85% 0%, rgba(255,77,79,0.26) 0%, rgba(255,77,79,0) 58%), linear-gradient(165deg, #ffe2de 0%, #fff3f1 48%, #ffffff 100%)",
     },
     cardImage: {
       src: "/projects/ufaild/cover3.png",
-      alt: "UFAILD app screens: a daily habit progress grid and a schedule of done and failed tasks",
+      alt: "UFAILD app screens: a daily progress calendar and a schedule of done and failed tasks",
       width: 1995,
       height: 1158,
     },

@@ -219,7 +219,7 @@ export default function AboutPage() {
 
         <ol className="mt-10 border-b border-line">
           {experience.map((e, i) => {
-            const accent = getProject(e.slug)?.accent ?? "#8d8d93";
+            const accent = getProject(e.slug)?.accent ?? "#6e6e73";
             return (
               <li
                 key={e.slug}
