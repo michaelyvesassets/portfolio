@@ -206,7 +206,7 @@ export function HangingShowcase({ projects }: { projects: Project[] }) {
   return (
     <section
       aria-roledescription="carousel"
-      aria-label="Selected work"
+      aria-label="Project carousel"
       className="relative"
     >
       <div

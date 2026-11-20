@@ -19,20 +19,25 @@ npm run build
 | `src/app/work/[slug]/page.tsx` | Case-study template (Meza, Flora Website, UFAILD, Flora App concept) |
 | `src/app/about`, `src/app/contact` | About and Contact |
 | `src/components/HangingShowcase.tsx` | Bézier cable, hanging cards, sway, carousel, controls |
+| `src/components/ProjectPhoneHero.tsx`, `ProjectBrowserHero.tsx` | Case-study heroes (iPhone / browser mockups) |
+| `src/components/ProjectKeyScreens.tsx` | Key screens section (grid on desktop, swipeable row on phones) |
+| `src/components/MobileNav.tsx` | Phone navigation (below 640px) |
 | `src/lib/bezier.ts` | Cubic Bézier evaluation and x→t inversion for anchor points |
 | `src/lib/projects.ts` | All project content |
-| `src/lib/site.ts` | Contact email and social links |
-| `public/references/` | Figma and Pinterest design references |
+| `src/lib/site.ts` | Contact email |
+| `public/projects/` | Project images (cleaned/cropped screens live in each project's `screens/` folder) |
 
-## Adding real content
+## Updating content
 
-Anything not yet confirmed renders as a labelled **placeholder**. Nothing is invented.
+All project content lives in `src/lib/projects.ts`. Nothing is invented: a project without images falls
+back to a clearly labelled placeholder.
 
-- **Screenshots:** put files in `public/projects/<slug>/` and set `cover` / `gallery` on the project in
-  `src/lib/projects.ts` with the image's real `width`/`height`. They are served through `next/image`.
-- **Role / year:** set `role` and `year` on the project.
-- **Case-study copy:** replace the placeholder sections in `src/app/work/[slug]/page.tsx`.
-- **Contact:** set `email` and link `href`s in `src/lib/site.ts`.
+- **Case-study screens:** add images to `public/projects/` and list them under the project's `showcase`
+  (`screens`, colours, and `device: "browser"` for websites) with their real `width`/`height`.
+  They are served through `next/image`.
+- **Header metadata:** `details` (category, platform, role, year, status).
+- **Case-study copy:** `caseStudy.challenge` / `process` / `outcome`, one string per paragraph.
+- **Contact:** the email in `src/lib/site.ts`.
 
 ## How the hanging cable works
 

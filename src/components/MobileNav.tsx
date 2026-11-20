@@ -11,8 +11,8 @@ const items = [
 ];
 
 /**
- * Phone navigation (below the `sm` breakpoint): the brand plus a Menu button
- * that opens a simple panel of large links. Closes on link tap, route change,
+ * Phone navigation (below the `sm` breakpoint): the brand plus a hamburger
+ * button that opens a simple panel of links. Closes on link tap, route change,
  * Escape or a tap outside. Desktop navigation is untouched.
  */
 export function MobileNav() {
@@ -58,16 +58,18 @@ export function MobileNav() {
           type="button"
           aria-expanded={open}
           aria-controls={panelId}
+          aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((o) => !o)}
-          className="inline-flex h-10 items-center gap-2.5 rounded-full bg-wash pl-4 pr-3.5 text-[15px] tracking-[-0.02em] text-ink"
+          // 44px touch target; the negative margin keeps the icon flush with the page edge.
+          className="-mr-[11px] flex size-11 items-center justify-center rounded-full text-ink"
         >
-          {open ? "Close" : "Menu"}
-          <span aria-hidden className="relative block h-2.5 w-3.5">
+          {/* Two thin 22px lines that cross into an X when open. */}
+          <span aria-hidden className="relative block h-[9px] w-[22px]">
             <span
-              className={`absolute left-0 h-px w-full bg-current transition-transform duration-300 ${open ? "top-1/2 rotate-45" : "top-0"}`}
+              className={`absolute left-0 top-0 h-[1.5px] w-full rounded-full bg-current transition-transform duration-[280ms] ease-out motion-reduce:transition-none ${open ? "translate-y-[3.75px] rotate-45" : ""}`}
             />
             <span
-              className={`absolute left-0 h-px w-full bg-current transition-transform duration-300 ${open ? "top-1/2 -rotate-45" : "bottom-0"}`}
+              className={`absolute bottom-0 left-0 h-[1.5px] w-full rounded-full bg-current transition-transform duration-[280ms] ease-out motion-reduce:transition-none ${open ? "-translate-y-[3.75px] -rotate-45" : ""}`}
             />
           </span>
         </button>
@@ -86,7 +88,7 @@ export function MobileNav() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 aria-current={pathname === item.href ? "page" : undefined}
-                className="flex items-center justify-between py-4 text-[26px] font-light tracking-[-0.04em] text-ink"
+                className="flex items-center justify-between py-[11px] text-[clamp(28px,7vw,32px)] font-medium leading-[1.1] tracking-[-0.04em] text-ink"
               >
                 {item.label}
                 <span aria-hidden className="text-[18px] text-mute">

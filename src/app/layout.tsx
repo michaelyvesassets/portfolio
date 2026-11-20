@@ -13,13 +13,29 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+const siteTitle = "Michael Crowther — I Design & Build Digital Products";
+const siteDescription =
+  "Portfolio of Michael Crowther, an AI-native full-stack product developer building digital products including Meza, UFAILD and Flora.";
+
 export const metadata: Metadata = {
   title: {
-    default: "Michael — I Design & Build Digital Products",
-    template: "%s — Michael",
+    default: siteTitle,
+    template: "%s — Michael Crowther",
   },
-  description:
-    "Portfolio of Michael, a designer and developer building digital products: Meza, Flora, UFAILD and more.",
+  description: siteDescription,
+  authors: [{ name: "Michael Crowther" }],
+  openGraph: {
+    type: "website",
+    siteName: "Michael Crowther",
+    title: siteTitle,
+    description: siteDescription,
+    locale: "en_GB",
+  },
+  twitter: {
+    card: "summary",
+    title: siteTitle,
+    description: siteDescription,
+  },
 };
 
 export const viewport: Viewport = {
